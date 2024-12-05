@@ -1,0 +1,35 @@
+version: '3.8'
+services:
+  mongo-config:
+    image: mongo:6.0
+    container_name: mongo-config
+    command: mongod --configsvr --replSet configReplSet --port 27001
+    ports:
+      - 27001:27001
+    volumes:
+      - ./configdb:/data/db
+
+  mongo-shard1:
+    image: mongo:6.0
+    container_name: mongo-shard1
+    command: mongod --shardsvr --replSet shard1ReplSet --port 27002
+    ports:
+      - 27002:27002
+    volumes:
+      - ./shard1:/data/db
+
+  mongo-shard2:
+    image: mongo:6.0
+    container_name: mongo-shard2
+    command: mongod --shardsvr --replSet shard2ReplSet --port 27003
+    ports:
+      - 27003:27003
+    volumes:
+      - ./shard2:/data/db
+
+  mongo-router:
+    image: mongo:6.0
+    container_name: mongo-router
+    command: mongos --configdb configReplSet/mongo-config:27001 --bind_ip_all
+    ports:
+      - 27017:27017
